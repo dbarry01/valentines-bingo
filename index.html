@@ -8,7 +8,7 @@
 <style>
 :root {
   --bg:#0f0f14;
-  --card:#1c1c24;
+  --card:rgba(28,28,36,0.85);
   --accent:#e36b84;
   --marked:#5b2a34;
   --text:#f5f5f5;
@@ -16,11 +16,21 @@
 
 body {
   font-family:Poppins,system-ui;
-  background:var(--bg);
-  color:var(--text);
+  background: url('FullSizeRender.jpeg') no-repeat center center fixed;
+  background-size: cover;
+  color: var(--text);
   text-align:center;
   margin:0;
   padding:20px;
+  position: relative;
+}
+
+body::before {
+  content:"";
+  position: fixed;
+  inset:0;
+  background: rgba(15,15,20,0.6);
+  z-index: -1;
 }
 
 h1 {margin-bottom:0}
@@ -45,17 +55,24 @@ button {
 }
 
 .boards {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-  gap:20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   max-width:1100px;
   margin:20px auto;
 }
 
+@media(min-width:700px){
+  .boards {
+    flex-direction: row;
+  }
+}
+
 .board {
-  background:var(--card);
+  background: var(--card);
   padding:15px;
   border-radius:20px;
+  flex:1;
 }
 
 .grid {
@@ -67,13 +84,14 @@ button {
 .cell {
   background:#262630;
   border-radius:12px;
-  padding:10px;
-  font-size:12px;
-  min-height:78px;
+  padding:8px;
+  font-size:14px;
+  min-height:60px;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  word-break:break-word;
 }
 
 .cell.marked {
@@ -163,7 +181,7 @@ button {
   </div>
 </div>
 
-<audio id="sound">
+<audio id="sound" preload="auto">
   <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
 </audio>
 
@@ -184,6 +202,14 @@ const cardB=[
 "Isolating","Mood change","Confrontation","Secret hinted","Rethink ending"
 ];
 
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
 function build(boardId,data,bingoId){
   const b=document.getElementById(boardId);
   b.innerHTML="";
@@ -197,7 +223,10 @@ function build(boardId,data,bingoId){
   });
 }
 
+let gameOver = false;
+
 function check(boardId,bingoId){
+  if(gameOver) return;
   const c=[...document.getElementById(boardId).children];
   const w=[[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],
   [15,16,17,18,19],[20,21,22,23,24],
@@ -205,6 +234,7 @@ function check(boardId,bingoId){
   [3,8,13,18,23],[4,9,14,19,24],
   [0,6,12,18,24],[4,8,12,16,20]];
   if(w.some(r=>r.every(i=>c[i].classList.contains("marked")))){
+    gameOver = true;
     document.getElementById(bingoId).style.display="block";
     document.getElementById("sound").play();
     celebrate(bingoId==="bingoA"?labelA.innerText:labelB.innerText);
@@ -230,12 +260,13 @@ function closePopup(){overlay.style.display="none";}
 function startGame(){
   labelA.innerText=nameA.value||"Player A";
   labelB.innerText=nameB.value||"Player B";
+  gameOver=false;
   resetGame();
 }
 
 function resetGame(){
-  build("boardA",cardA,"bingoA");
-  build("boardB",cardB,"bingoB");
+  build("boardA",shuffle([...cardA]),"bingoA");
+  build("boardB",shuffle([...cardB]),"bingoB");
   bingoA.style.display="none";
   bingoB.style.display="none";
 }
