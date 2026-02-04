@@ -139,10 +139,51 @@ button {
   from {transform:translateY(0);opacity:1;}
   to {transform:translateY(-120px);opacity:0;}
 }
+
+/* ===== INTRO SCREEN (NEW) ===== */
+.intro {
+  position:fixed;
+  inset:0;
+  background:url('RedandPink.jpg') center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
+
+.intro::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.55);
+}
+
+.intro-card{
+  position:relative;
+  background:rgba(28,28,36,.9);
+  padding:30px;
+  border-radius:22px;
+  max-width:320px;
+}
+
+.intro h1{
+  color:var(--accent);
+  margin-bottom:15px;
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- INTRO -->
+<div class="intro" id="intro">
+  <div class="intro-card">
+    <h1>Will you be my Valentine? 💘</h1>
+    <button onclick="enterGame()">Yes 💖</button>
+    <button onclick="nope()">No 🙈</button>
+  </div>
+</div>
 
 <h1>Valentine’s Movie Bingo</h1>
 <h2>The Housemaid Edition</h2>
@@ -202,14 +243,13 @@ const cardB=[
 "Isolating","Mood change","Confrontation","Secret hinted","Rethink ending"
 ];
 
-// Shuffle but keep FREE in the middle
 function shuffleWithFree(array){
-  let arr = array.filter(item => item !== "FREE"); // remove FREE
+  let arr = array.filter(item => item !== "FREE");
   for(let i=arr.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  arr.splice(12,0,"FREE"); // insert FREE in center
+  arr.splice(12,0,"FREE");
   return arr;
 }
 
@@ -226,7 +266,7 @@ function build(boardId,data,bingoId){
   });
 }
 
-let gameOver = false;
+let gameOver=false;
 
 function check(boardId,bingoId){
   if(gameOver) return;
@@ -237,7 +277,7 @@ function check(boardId,bingoId){
   [3,8,13,18,23],[4,9,14,19,24],
   [0,6,12,18,24],[4,8,12,16,20]];
   if(w.some(r=>r.every(i=>c[i].classList.contains("marked")))){
-    gameOver = true;
+    gameOver=true;
     document.getElementById(bingoId).style.display="block";
     document.getElementById("sound").play();
     celebrate(bingoId==="bingoA"?labelA.innerText:labelB.innerText);
@@ -270,8 +310,16 @@ function startGame(){
 function resetGame(){
   build("boardA", shuffleWithFree([...cardA]), "bingoA");
   build("boardB", shuffleWithFree([...cardB]), "bingoB");
-  bingoA.style.display = "none";
-  bingoB.style.display = "none";
+  bingoA.style.display="none";
+  bingoB.style.display="none";
+}
+
+function enterGame(){
+  document.getElementById("intro").style.display="none";
+}
+
+function nope(){
+  alert("That button is broken 😘 Try again.");
 }
 
 resetGame();
